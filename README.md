@@ -29,8 +29,14 @@ Please note that the current status of the repository is not permanent and may c
 ### Credits
 
 ServerClown - Main Developer
+
 Crunch Brunch - Assistance/Developer
+
 LittleBlueBox1 - Assistance
+
 MISCHAGER - Assistance
+
 p2r3 - Vscript Libraries
+
 LaVashik - Vscript Libraries
+
