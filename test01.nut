@@ -2,6 +2,7 @@ local blue = ppmod.get("blue")
 local red = ppmod.get("red")
 local host = FindByEntIndex(1)
 local partner = FindByEntIndex(2)
+if (NoclipState == null) NoclipState <- false;
 if (NoclipState == false) {
 	if (host.IsNoclipping() == false) {
 		ppmod.fire(host, "addoutput", "MoveType 8")
