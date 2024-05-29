@@ -9,12 +9,12 @@ Some scripts are known to have issues, if you find out the issue and know how to
 
 ## Notable Scripts
 
-* **[MapSpawn](https://www.youtube.com)**
+* **[MapSpawn](mapspawn.nut)**
 * Utilizes Developer Convar to make changes
 * Ability to change the game in various ways
 * Many cool modifications like extra parts of a map and a WIP advanced version of course 01
 
-* **[Improved Noclip Script](https://www.youtube.com)**
+* **[Improved Noclip Script](test01.nut)**
 * Most other noclip scripts that you find(if you can even find one break when you die or just will not work at all if you try to change your team, causing you to manually noclip every time you want to fly.
 * Thanks to this improved Noclip Script, all of those issues are fixed! And not only that, there is also an option to change the player that the noclipstate is given to, increasing the capability of this script. 
 
