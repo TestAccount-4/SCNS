@@ -22,7 +22,7 @@ This file contains various console command aliases or functions. **SAR is requir
 #### New Console Commands
 
 | Command | Description | Extra Notes |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | `rickend` | Makes rick sing and completes level. | Explodes bots in order to proceed. |
 | `showchatkey` | Shows a chat hint to make another player chat. | Goes away after around 5 seconds. |
 | `showremoteviewkey` | Shows a remote view hint to make them view your perspective. | Goes away after around 5 seconds |
@@ -33,7 +33,7 @@ This file contains various console command aliases or functions. **SAR is requir
 | `swapteams` | Swaps player teams, including their player models. | Only works once per map. |
 | `+scns_place1` | When bound, will allow the host to place a portal on any surface. | If held down, the other player can also place theirs. | **Requires cvar-unhide!** |
 | `+scns_place2` | When bound, will allow the host to place a portal on any surface. | If held down, the other player can also place theirs.| **Requires cvar-unhide!** |
-| `scns_bindportalplaceanywhere` | Binds mouse1 and mouse2 to +scns_place1 and +scns_place2. |  |
+| `scns_bindportalplaceanywhere` | Binds mouse1 and mouse2 to +scns_place1 and +scns_place2. | Does not require cheats. |
 
 #### New Console Functions
 
