@@ -7,7 +7,7 @@ The libraries that are used are only ppmod are pcapture-lib, if you have another
 
 Some scripts are known to have issues, if you find out the issue and know how to fix it, please open a pull request so it can be fixed.
 
-If you need to see the documentation on scripts, then visit the documentaiton [here](ScriptDocumentation.md)
+If you need to see the documentation on scripts, then visit the documentaiton [here](ScriptDocumentation.md).
 
 ## Notable Scripts
 
