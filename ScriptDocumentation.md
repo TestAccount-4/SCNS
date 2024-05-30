@@ -12,8 +12,8 @@ This Vscripts library has many script functions and scripts that can do various 
 | --- | --- | --- | --- |
 | `MPTP(PlayerIndex,PlayerIndex)` | Teleports a player to a player origin. | MPTP(2,1) | arg1 is the origin arg2 is moved to |
 | `PlacePortal(Portal Pair #, Portal #, Position, Angle)` | Works like portal_place, places a portal anywhere. | PlacePortal(1,1,host.GetOrigin() | Portal Pair # 1=atlas pair and 2 = p-body pair |
-| `SetPlayerModel(PlayerIndex,ModelName)` | Sets the model of a player. | SetPlayerModel(1,"models/error.mdl") |  |
-| `GetPicker()` | Returns the instance that you're looking at. | local picker = GetPicker() | **Model MUST be precached or else the game will crash!** |
+| `SetPlayerModel(PlayerIndex,ModelName)` | Sets the model of a player. | SetPlayerModel(1,"models/error.mdl") | **Model MUST be precached or else the game will crash!** |
+| `GetPicker()` | Returns the instance that you're looking at. | local picker = GetPicker() |  |
 | `FindObject(Object Instance)` | Displays a hint at the object specified. | FindObject(FindByEntIndex(32)) | Hint does not have text. |
 | `SetLobbyMovie(filepath)` | Plays a movie of your choice in the main lobby. | SetLobbyMovie("media/attract01.bik") | Can only be executed once. |
 | `FindByEntIndex(EntIndex)` | Returns the index of an entity based off of a provided Entity Index | local host = FindByEntIndex(1) | Parameter must be an integer. |
