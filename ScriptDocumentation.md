@@ -1,0 +1,113 @@
+# SCNS VScripts Library Documentation
+
+This Vscripts library has many script functions and scripts that can do various things.
+
+# 1. Main Script Functions
+
+## 1a. [Mapspawn](Mapspawn.nut)
+
+`Mapspawn`, contains a bunch of script functions which can do various things. Most functions are meant to be used mid-game
+
+| Function | Description | Example Usage | Extra Notes |
+| --- | --- | --- | --- |
+| `MPTP(PlayerIndex,PlayerIndex)` | Teleports a player to a player origin. | MPTP(2,1) | arg1 is the origin arg2 is moved to |
+| `PlacePortal(Portal Pair #, Portal #, Position, Angle)` | Works like portal_place, places a portal anywhere. | PlacePortal(1,1,host.GetOrigin() | Portal Pair # 1=atlas pair and 2 = p-body pair |
+| `SetPlayerModel(PlayerIndex,ModelName)` | Sets the model of a player. | SetPlayerModel(1,"models/error.mdl") |  |
+This table is ***WIP.***
+
+### 1b. [`AutoExec`](autoexec.cfg)
+
+This file contains various console command aliases or functions. **SAR is required for any command in autoexec.cfg to work!**
+
+#### New Console Commands
+
+| Command | Description | Extra Notes |
+| --- | --- | --- | --- |
+| `rickend` | Makes rick sing and completes level. | Explodes bots in order to proceed. |
+| `showchatkey` | Shows a chat hint to make another player chat. | Goes away after around 5 seconds. |
+| `showremoteviewkey` | Shows a remote view hint to make them view your perspective. | Goes away after around 5 seconds |
+| `blah` | Makes glados say 'blah' | This is not just a sound, it can override GLaDOS's dialogue if executed. |
+| `connectportals` | Connects both player's portals. | Both players have only 1 pair total and script breaks after death. |
+| `launchplayer` | Launches both players upward at 10,000 velocity | VERY fast. |
+| `spawncubeintervals` | Spawns a cube or ball from a dropper every second. | Can lag and can clog droppers. |
+| `swapteams` | Swaps player teams, including their player models. | Only works once per map. |
+| `+scns_place1` | When bound, will allow the host to place a portal on any surface. | If held down, the other player can also place theirs. | **Requires cvar-unhide!** |
+| `+scns_place2` | When bound, will allow the host to place a portal on any surface. | If held down, the other player can also place theirs.| **Requires cvar-unhide!** |
+| `scns_bindportalplaceanywhere` | Binds mouse1 and mouse2 to +scns_place1 and +scns_place2. |  |
+
+#### New Console Functions
+
+| Function/Command | Description | Example Usage | Extra Notes |
+| --- | --- | --- | --- |
+| `scns_findpartner <Player Instance>` | Creates a hint at the player to let the other player know where you or they are. | scns_findpartner FindByEntIndex(1)| Does not have text and can be on any object, not just players. |
+| `scns_MPTP <PlayerIndex> <PlayerIndex>` | Teleports a player to another player. | scns_MPTP 2 1 | arg1 is the origin arg2 is moved to |
+| `scns_kill <PlayerIndex>` | Kills a player. | scns_kill 2 | Functions almost exactly like the kill command, but without cheats and with player indexes instead of steam names. |
+| `scns_setlinearforce_global <integer>`| Sets the speed of every excursion funnel on the map. | scns_setlinearforce_global -300 | If set to negative, it will reverse the funnel polarity. |
+| `scns_setlinearforce <integer>` | Sets speed of the funnel you're looking at. | scns_setlinearforce 600 | Difficult to get instance of a funnel by !picker, use scns_setlinearforce_global instead. |
+| `scns_setlobbymovie <filepath>` | Plays a movie in the lobby of your choice | scns_setlobbymovie "media/attract01.bik" | Does not work if not used in lobby. |
+
+# 2. Info on every script
+
+There are around 75 scripts in SCNS and their function or purpose may not be what they seem, this table is meant to clear up some questions you may have about some scripts in SCNS.
+
+| Name | Description | Working or not |
+| --- | --- | --- |
+| `atlasradio` | Setup script, ignore | Works |
+| `BECOMEFAST` | Makes you faster. | Broken |
+| `bee` | throwaway document, not useful | Ignore |
+| `blahcommand` | Modified multiplayer mod script to add a command which makes GLaDOS say "blah" | Broken |
+| `bluelasereyes` | Makes a laser which shoots from blue's eyes. | Broken (as of currently) |
+| `cometogethereveryone` | Supposed to create | Completely Broken |
+| `cometomeorange` | **LITERAL CHAOS** | Works |
+| `COMETOMYEYES` | Teleports your partner to you. - Works (Partially)
+| `connectportals` | Connects both you and your partner's portals. | Works |
+| `coopintroduction` | Makes you say a ChatGPT generated introduction to coop in chat. | Works |
+| `createbrush` | Originally used to test creating a brush, but repurposed for a failed turret creation script. | Broken |
+| `delcatapults` | Deletes catapult triggers from `cometogethereveryone` script | Broken |
+| `displayonbluehead` | Tries to create a vgui entity and parent it to blue. | Broken **(Crashes game if used!)** |
+| `displaytext` | Displays text on-screen for both players defined within its file. | Works |
+| `dissolvecube` | Fizzles the object you're currently looking at. | Works |
+| `finalelobby` | Turns the hub into a Wheatley-controlled version of itself. (Agonzo320/SCN's version.) | Unfinished |
+| `fogscript` | Covers the map within a thick fog. | Works |
+| `givenoclip` | Erased early noclip script | Likely to be deleted |
+| `givepotatogun` | Self-explanitory | Broken |
+| `goback` | Teleports you and your partner back to your spawn points | Broken |
+| `hubcontrol` | Turns the hub into a Wheatley-esque version of itself. (Crunch Brunch's version.) | Works |
+| `hubscare` | Turns the hub into a "horror"-esque version. (OUTDATED! USE `hubtrolle` INSTEAD!) | Works |
+| `hubtrolle` | Newer version of `hubscare` | Works |
+| `kp_1-9 & kp_reset & kp_fprward & kp_backward` | Script system which can let you change to any map in base coop | Works |
+| `launchplayers` | Launches both Atlas and P-body upward at 10,000 velocity. | Works |
+| `libtest` | Pcapture-lib script | Ignore |
+| `LOOKATRED` | Forces Atlas's camera to look at P-body | Broken |
+| `makecubebouncy` | Covers the object you're currently looking at in Repulsion Gel. | Works |
+| `makecubespeedy` | Covers the object you're currently looking at in Propulsion Gel. | Works |
+| `mapspawn` | Complex script, visit [readme](readme.md) and **Main Script Functions** sections for more information. | Works (Mostly) |
+| `movecatapult` | Moves a catapult in lobby to orange and its target to blue, launching orange to blue. | Works but makes course 06 inescapeable |
+| `mp_coop_lobby` | Placeholder file, meant for debugging purpses | Ignore |
+| `mp_coop_race_2` | Leftover script from Colored Partners, meant for debugging purposes. | Broken |
+| `mp_coop_rat_maze_advanced` | Scrapped version of an advanced version of mp_coop_rat_maze. | Works |
+| `publicsetnewmodel` | Sets a player model to something else (Use `SetNewModel` instead!) | Works |
+| `replaceorangewithatlas` | Swaps the model of orange and blue, does not change teams | Works |
+| `replacetriggerhurt` | Tries to replace every trigger_hurt within a map to a trigger_catapult. | Broken |
+| `resetmodel` | Resets the model of blue. | Works |
+| `rickend` | Plays the Adventure Core's singing before exploding the bots and transitioning to the next level. | Works |
+| `sayXXX` | Random scripts that say random stuff. (Literally) | Works |
+| `sncscrazylasermod` - Failed concept, might be reused in the future | Broken |
+| `scripttimedelay` | Setup script for a time delay function and automatically executed. Please check **Main Script Functions** for more information on this. | Works |
+| `setgravity` | Self explanitory. | Broken |
+| `setnewmodel` | Sets the model of blue or orange to any model in the game, as long as it's precached | Works |
+| `skiptonextlevel` | Skips to the next level (OBSOLETE, use transition_map console command instead.) | Works |
+| `spawnXXX` | Failed attempts at spawning things. | Broken |
+| `spawncube` | Only `spawnXXX` script that actually spawns something, it spawns a cube with no physics and cannot be picked up | Works (except no physics) |
+| `swapmodelwithpicker` | Swaps your model with the thing you're currently looking at. | Works |
+| `swapteams` | Swaps the actual teams of the players and their models (also precaches model skins, so that's a plus) | Works but only once per map |
+| `test01` | **The** Customizable noclip script. (In SCNS.) | Works |
+| `test02` | Alternates between giving noclip to blue or orange | Works |
+| `testfunctions` | P2MM File, used for debugging purposes | Ignore |
+| `Warning` | Setup script. Spawns a hint based off of parameters defined within the file. Used for `FindPartner` function and `FindObject()` script function. | Works |
+| `YOUCANTHIDEFROMROTATY` | Originally purposed for setting up for the "Chaos" script, but repurposed after a rewrite of the script for another failed spawning attempt. | Broken |
+
+
+
+
+### [Info on SCNS](readme.md)
