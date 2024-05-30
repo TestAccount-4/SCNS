@@ -68,7 +68,7 @@ if (Player == 1) {
 }
 }
 GetPicker <- function() {
-EntFire("!picker","runscriptcode","scns_picker <- self")
+EntFire("!picker","runscriptcode","::scns_picker <- self")
 return scns_picker
 }
 // B9TC <- function(base9Str) {
