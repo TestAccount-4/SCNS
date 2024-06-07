@@ -1,6 +1,9 @@
 //********************************************************************************************
 //MAPSPAWN.nut is called on newgame or transitions
 //********************************************************************************************
+if (GetDeveloperLevel() == 101) {
+  return;
+}
 if (!("Entities" in this)) return;
 printl("==== calling mapspawn.nut")
 IncludeScript("ppmod4.nut")
@@ -17,23 +20,37 @@ PlacePortal <- function(group = 1,portal = 1,pos= "0 0 0",ang = "0 0 0") {
   local p2 = ppmod.get("prop_portal",p1)
   local p3 = ppmod.get("prop_portal",p2)
   local p4 = ppmod.get("prop_portal",p3)
+  if (typeof pos == "Vector") {
+    pos2 <- pos.x + " " + pos.y + " " + pos.z
+  } else if (typeof pos == "string") {
+    pos2 <- pos
+  } else {
+    print("WARNING: Must be a Vector or String!")
+  }
+  if (typeof ang == "Vector") {
+    ang2 <- ang.x + " " + ang.y + " " + ang.z
+  } else if (typeof ang == "string") {
+    ang2 <- ang
+  } else {
+    print("WARNING: Must be a Vector or String!")
+  }
   if (group == 1) {
     if (portal == 1) {
-      ppmod.fire(p1,"newlocation",pos+" "+ang)
+      ppmod.fire(p1,"newlocation",pos2+" "+ang2)
       ppmod.fire(p1,"SetActivatedState","1")
       return p1
     } else {
-      ppmod.fire(p2,"newlocation",pos+" "+ang)
+      ppmod.fire(p2,"newlocation",pos2+" "+ang2)
       ppmod.fire(p2,"SetActivatedState","1")
       return p2
     }
   } else if (group == 2) {
     if (portal == 1) {
-      ppmod.fire(p3,"newlocation",pos+" "+ang)
+      ppmod.fire(p3,"newlocation",pos2+" "+ang2)
       ppmod.fire(p3,"SetActivatedState","1")
       return p3
     } else {
-      ppmod.fire(p4,"newlocation",pos+" "+ang)
+      ppmod.fire(p4,"newlocation",pos2+" "+ang2)
       ppmod.fire(p4,"SetActivatedState","1")
       return p4
     }
@@ -68,8 +85,8 @@ if (Player == 1) {
 }
 }
 GetPicker <- function() {
-EntFire("!picker","runscriptcode","::scns_picker <- self")
-return scns_picker
+  EntFire("!picker","runscriptcode","::scns_picker <- self")
+  return scns_picker
 }
 // B9TC <- function(base9Str) {
 //     // Convert a base 9 string to an integer
@@ -191,43 +208,62 @@ if (PlayerIndex == "null") {
 }
 KillPlayer <- function(PlayerIndex = "both") {
 if (PlayerIndex == "both") {
-  dev.warning("Index not specified!")
-} else {
+  ppmod.fire(FindByEntIndex(1),"sethealth",-100);
+  ppmod.fire(FindByEntIndex(2),"sethealth",-100);
+} else if ("red") {
+  ppmod.fire(FindByEntIndex(2),"sethealth",-100);
+} else if ("blue") {
+  ppmod.fire(FindByEntIndex(1),"sethealth",-100);
+} else if ("orange") {
+  ppmod.fire(FindByEntIndex(2),"sethealth",-100);
+} else{
   local PlayerInstance = FindByEntIndex(PlayerIndex)
   ppmod.fire(PlayerInstance,"sethealth",-100);
   
 }
 }
 SwapPlayerThing <- function(extraplayers = 0) {
-if (typeof extraplayers != "integer") {
-  dev.warning("Must be an integer!")
-  return;
-} 
-local host = FindByEntIndex(1)
-local partner = FindByEntIndex(2)
-local hostpos = host.GetOrigin()
-local partnerpos = partner.GetOrigin()
-host.SetOrigin(partnerpos)
-partner.SetOrigin(hostpos)
-host.SetAngles(partner.GetAngles())
-partner.SetAngles(host.GetAngles())
-// local bluep1 = ppmod.get("prop_portal")
-// local bluep2 = ppmod.get("prop_portal",bluep1)
-// bluep1.SetOrigin(bluep2.GetOrigin())
-// bluep2.SetOrigin(bluep1.GetOrigin())
+  if (typeof extraplayers != "integer") {
+    dev.warning("Must be an integer!")
+    return;
+  }
+  local host = FindByEntIndex(1)
+  local partner = FindByEntIndex(2)
+  local hostpos = host.GetOrigin()
+  local partnerpos = partner.GetOrigin()
+  host.SetOrigin(partnerpos)
+  partner.SetOrigin(hostpos)
+  host.SetAngles(partner.GetAngles())
+  partner.SetAngles(host.GetAngles())
+  // local bluep1 = ppmod.get("prop_portal")
+  // local bluep2 = ppmod.get("prop_portal",bluep1)
+  // bluep1.SetOrigin(bluep2.GetOrigin())
+  // bluep2.SetOrigin(bluep1.GetOrigin())
 }
+
+idletext <- false
+  ppmod.interval(function() {
+    IncludeScript("ppmod3.nut");
+    if (idletext == true) {
+      scns_txt <- ppmod.text("Server is idle.");
+      scns_txt.SetPosition(0.005,0.925)
+      scns_txt.SetColor("0 255 0", "0 0 0");
+      scns_txt.Display(1);
+      ppmod.keyval(scns_txt.GetEntity,"channel","8")
+    }
+  },1,"scns_idletext") 
  ppmod.onauto(async(function () {
-  pgun1 <- ppmod.get("weapon_portalgun")
-  pgun2 <- ppmod.get("weapon_portalgun",pgun1)
+  ::pgun1 <- ppmod.get("weapon_portalgun")
+  ::pgun2 <- ppmod.get("weapon_portalgun",pgun1)
   EntFire("worldspawn","addoutput","paintinmap 1")
   //EntFire("@command","command","exec auto")
   //EntFire("@command","command","script_execute scripttimedelay.nut")
-  blue <- ppmod.get("blue")
-  red <- ppmod.get("red")
-  host <- FindByEntIndex(1)
-  partner <- FindByEntIndex(2)
-  omnipartner <- FindByEntIndex(3)
-  spawncube <- function(pos = blue.GetOrigin()) {
+  ::blue <- ppmod.get("blue")
+  ::red <- ppmod.get("red")
+  ::host <- FindByEntIndex(1)
+  ::partner <- FindByEntIndex(2)
+  ::omnipartner <- FindByEntIndex(3)
+  ::spawncube <- function(pos = blue.GetOrigin()) {
     local cube = ppmod.create("prop_weighted_cube").then(function (cube) {
       cube.SetOrigin(pos);
     });
@@ -1069,7 +1105,7 @@ setupfunc(); // Initialize the function to start the bizarre portal mechanic
   
   // EntFireByHandle(ambient, "playsound", "", 0.0, null, null)
   // script TimeDelay(5,"music/sp_a2_bts1_b1.wav","changelevel mp_coop_rat_maze","labs/potato_timer_01.wav",false,true,"music/sp_a4_finale1_b5.wav",true)
-  TimeDelay(300,"music/sp_a2_bts1_b1.wav","restart_level","labs/potato_timer_01.wav",true,true,"music/sp_a4_tb_catch_c1b.wav",true)
+  // TimeDelay(300,"music/sp_a2_bts1_b1.wav","restart_level","labs/potato_timer_01.wav",true,true,"music/sp_a4_tb_catch_c1b.wav",true)
   // TimeDelay(300,"music/sp_a4_finale1_b1.wav","restart_level","labs/potato_timer_01.wav",true,true) // Course 1
   // TimeDelay(105,"music/sp_a2_bts1_b1.wav","restart_level","labs/potato_timer_01.wav",true,true,true) // Final Chamber
   // TimeDelay(300,"music/sp_a4_finale4_b1.wav","restart_level","labs/potato_timer_01.wav",true,true) // Course 2-3
@@ -1082,6 +1118,16 @@ setupfunc(); // Initialize the function to start the bizarre portal mechanic
   ppmod.interval(function() {
     TimeDelay(180,"","script KillPlayer(1);script KillPlayer(2)","",true,true)
   },180)
+} else if (GetDeveloperLevel() == 14) {
+  EntFire("player","addoutput","solid 0")
+  ppmod.wait(function():() {
+      EntFire("player","addoutput","solid 6")
+  },4)
+} else if (GetDeveloperLevel() == 15) {
+  ppmod.interval(function() {
+    ppmod.fire(FindByEntIndex(3),"addoutput","teamnumber -1")
+  },2)
+  ppmod.fire("player","addoutput","solid 4")
 }
 }));
 
