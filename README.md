@@ -30,6 +30,8 @@ ServerClown - Main Developer
 
 Crunch Brunch - Assistance/Developer
 
+Jim - Assistance/Developer
+
 LittleBlueBox1 - Assistance
 
 MISCHAGER - Assistance
