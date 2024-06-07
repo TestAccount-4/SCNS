@@ -13,7 +13,11 @@ ppmod.fire("!picker","runscriptcode","::scns_picker <- self")
     if (!pickermodel||!hostmodel) return;
     scns_picker.SetModel(hostmodel.tostring());
     host.SetModel(pickermodel.tostring());
-    scns_target <- null;
+    ppmod.wait(function() {
+      scns_picker <- null;
+    })
+    
+    
 
 
 
