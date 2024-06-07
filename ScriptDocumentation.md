@@ -86,7 +86,7 @@ There are around 75 scripts in SCNS and their function or purpose may not be wha
 | `LOOKATRED` | Forces Atlas's camera to look at P-body | Broken |
 | `makecubebouncy` | Covers the object you're currently looking at in Repulsion Gel. | Works |
 | `makecubespeedy` | Covers the object you're currently looking at in Propulsion Gel. | Works |
-| `mapspawn` | Complex script, visit [readme](readme.md) and **Main Script Functions** section for more information. | Works (Mostly) |
+| `mapspawn` | Complex script, visit [readme](readme.md) and [**Main Script Functions**](https://github.com/TestAccount-4/SCNS/blob/main/ScriptDocumentation.md#1a-mapspawn) section for more information. | Works (Mostly) |
 | `movecatapult` | Moves a catapult in lobby to orange and its target to blue, launching orange to blue. | Works but makes course 06 inescapeable |
 | `mp_coop_race_2` | Leftover script from Colored Partners, meant for debugging purposes. | Broken |
 | `mp_coop_rat_maze_advanced` | Scrapped version of an advanced version of mp_coop_rat_maze. | Works |
