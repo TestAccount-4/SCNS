@@ -4,7 +4,7 @@ This Vscripts library has many script functions and scripts that can do various 
 
 # 1. Main Script Functions
 
-## 1a. [Mapspawn](Mapspawn.nut)
+## 1a. [`Mapspawn`](Mapspawn.nut)
 
 `Mapspawn`, contains a bunch of script functions which can do various things. Most functions are meant to be used mid-game
 
