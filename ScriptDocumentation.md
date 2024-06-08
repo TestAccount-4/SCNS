@@ -104,7 +104,7 @@ There are around 75 scripts in SCNS and their function or purpose may not be wha
 | `spawnXXX` | Failed attempts at spawning things. | Broken |
 | `spawncube` | Only `spawnXXX` script that actually spawns something, it spawns a cube with no physics and cannot be picked up | Works (except no physics) |
 | `swapmodelwithpicker` | Swaps your model with the thing you're currently looking at. | Works |
-| `swapteams` | Swaps the actual teams of the players and their models (also precaches model skins, so that's a plus) | Works but only once per map |
+| `swapteams` | Swaps the actual teams of the players and their models (also precaches model skins, so that's a plus) | Works |
 | `test01` | **The** Customizable noclip script. (In SCNS.) | Works |
 | `test02` | Alternates between giving noclip to blue or orange | Works |
 | `testfunctions` | P2MM File, used for debugging purposes | Ignore |
