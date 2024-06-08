@@ -96,7 +96,7 @@ There are around 75 scripts in SCNS and their function or purpose may not be wha
 | `resetmodel` | Resets the model of blue. | Works |
 | `rickend` | Plays the Adventure Core's singing before exploding the bots and transitioning to the next level. | Works |
 | `sayXXX` | Random scripts that say random stuff. (Literally) | Works |
-| `sncscrazylasermod` - Failed concept, might be reused in the future | Broken |
+| `sncscrazylasermod` | - Failed concept, might be reused in the future | Broken |
 | `scripttimedelay` | Setup script for a time delay function and automatically executed. Please check **Main Script Functions** for more information on this. | Works |
 | `setgravity` | Self explanitory. | Broken |
 | `setnewmodel` | Sets the model of blue or orange to any model in the game, as long as it's precached | Works |
