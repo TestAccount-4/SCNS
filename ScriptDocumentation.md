@@ -98,7 +98,7 @@ There are around 75 scripts in SCNS and their function or purpose may not be wha
 | `sayXXX` | Random scripts that say random stuff. (Literally) | Works |
 | `sncscrazylasermod` | - Failed concept, might be reused in the future | Broken |
 | `scripttimedelay` | Setup script for a time delay function and automatically executed. Please check **Main Script Functions** for more information on this. | Works |
-| `setgravity` | Self explanitory. | Broken |
+| `setgravity` | Self explanatory. | Broken |
 | `setnewmodel` | Sets the model of blue or orange to any model in the game, as long as it's precached | Works |
 | `skiptonextlevel` | Skips to the next level (OBSOLETE, use transition_map console command instead.) | Works |
 | `spawnXXX` | Failed attempts at spawning things. | Broken |
