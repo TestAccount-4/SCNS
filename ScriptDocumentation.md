@@ -6,7 +6,9 @@ This Vscripts library has many script functions and scripts that can do various 
 
 ## 1a. [`Mapspawn`](Mapspawn.nut)
 
-`Mapspawn`, contains a bunch of script functions which can do various things. Most functions are meant to be used mid-game
+`Mapspawn`, contains a bunch of script functions which can do various things. Most functions are meant to be used mid-game.
+
+### New Script Functions
 
 | Function | Description | Example Usage | Extra Notes |
 | --- | --- | --- | --- |
@@ -19,13 +21,23 @@ This Vscripts library has many script functions and scripts that can do various 
 | `FindByEntIndex(EntIndex)` | Returns the index of an entity based off of a provided Entity Index | local host = FindByEntIndex(1) | Parameter must be an integer. |
 | `SetPlayerTeam(PlayerIndex,Team)` | Sets the team of a player based off of their player index. | SetPlayerTeam(1,2) | Team 0 = SinglePlayer, Team 2 = Orange and team 3 = Blue |
 | `KillPlayer(PlayerIndex)` | Kills a player. | KillPlayer(1) | Functions almost exactly like the `Kill` console command, except it uses player index instead of the steam names. |
-| `SwapPlayerThing()` | Swaps the positions and angles of player 1 and 2 of the coop session. |  | Does not swap portals or swap velocity and can break some chambers if done at the wrong time and place. |
+| `SwapPlayerThing()` | Swaps the positions and angles of player 1 and 2 of the coop session. | SwapPlayerThing() | Does not swap portals or swap velocity and can break some chambers if done at the wrong time and place. | `ReturnParm(Instance)` | Returns what is specified. Can be useful when you want to put an action on something that isn't defined as an instance. | ReturnParm(Entities.FindByClassname("env_portal_laser").Destroy() | Does not just work for instances, can also work for anything else, even null instances. |
+| `GiveLaserEyes(PlayerIndex,)` |
 
-### 1b. [`AutoExec`](autoexec.cfg)
+
+### New Variables
+
+| Variable = defaultvar | Purpose | Example | Extra Notes |
+| --- | --- | --- | --- |
+| `forgivingpaint = false` | When changed to true, enables paint spread for all droppers, making it more 'forgiving'. | forgivingpaint = true | Does not change anything when changed back to `false`. |
+| `IdleText = false` | When changed to true, enables text at the bottom left of the screen saying that the server is idle. | IdleText = true | Meant for mmod servers, allows changing back to false. |
+| `NoclipState = false` | Toggle between giving noclip state to player 1 or 2. | NoclipState = true;includescript("test01") | Meant for the noclip script, is toggled when script test02 is run. |
+
+## 1b. [`AutoExec`](autoexec.cfg)
 
 This file contains various console command aliases or functions. **SAR is required for any command in autoexec.cfg to work!**
 
-#### New Console Commands
+### New Console Commands
 
 | Command | Description | Extra Notes |
 | --- | --- | --- |
@@ -41,7 +53,7 @@ This file contains various console command aliases or functions. **SAR is requir
 | `+scns_place2` | When bound, will allow the host to place a portal on any surface. | If held down, the other player can also place theirs. | **Requires cvar-unhide!** |
 | `scns_bindportalplaceanywhere` | Binds mouse1 and mouse2 to +scns_place1 and +scns_place2. | Does not require cheats. |
 
-#### New Console Functions
+### New Console Functions
 
 | Function/Command | Description | Example Usage | Extra Notes |
 | --- | --- | --- | --- |
@@ -61,7 +73,7 @@ There are around 75 scripts in SCNS and their function or purpose may not be wha
 | `atlasradio` | Setup script, ignore | Works |
 | `BECOMEFAST` | Makes you faster. | Broken |
 | `blahcommand` | Modified multiplayer mod script to add a command which makes GLaDOS say "blah" | Broken |
-| `bluelasereyes` | Makes a laser which shoots from blue's eyes. | Broken (as of currently) |
+| `bluelasereyes` | Makes a laser which shoots from blue's eyes. | Works (OBSOLETE!! Use GiveLaserEyes() function instead!) |
 | `cometogethereveryone` | Supposed to fling both players together. | Completely Broken |
 | `cometomeorange` | **LITERAL CHAOS** | Works |
 | `COMETOMYEYES` | Teleports your partner to you. - Works (Partially)
