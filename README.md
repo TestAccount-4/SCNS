@@ -15,6 +15,7 @@ If you need to see the documentation on scripts, then visit the documentaiton [h
 * Utilizes Developer Convar to make changes
 * Ability to change the game in various ways
 * Many cool modifications like extra parts of a map and a WIP advanced version of course 01
+* Many global functions that can be used to modify the game in different ways.
 
 * **[Improved Noclip Script](test01.nut)**
 * Most other noclip scripts that you find(if you can even find one break when you die or just will not work at all if you try to change your team, causing you to manually noclip every time you want to fly.
