@@ -2,10 +2,7 @@
 
 SCNS is a "Script Library" with a bunch of scripts for you to use.
 
-Please note that if you already have ppmod or pcapture-lib installed, then you might want to delete the files for them here so they don't contradict.
-The libraries that are used are only ppmod are pcapture-lib, if you have another library then don't delete it.
-
-Some scripts are known to have issues, if you find out the issue and know how to fix it, please open a pull request so it can be fixed.
+Some scripts are known to have issues, if you find out the issue and know how to fix it, please open a pull request so it can be fixed. Otherwise, please open an issue and I will try to fix it.
 
 If you need to see the documentation on scripts, then visit the documentaiton [here](ScriptDocumentation.md).
 
