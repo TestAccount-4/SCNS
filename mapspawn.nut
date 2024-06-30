@@ -1,17 +1,153 @@
 //********************************************************************************************
-//MAPSPAWN.nut is called on newgame or transitions
+// MAPSPAWN.NUT (ALPHA) Version 0.1
 //********************************************************************************************
+//
+//// Latest Patch Notes:
+//
+// Added Patch Notes.
+// Added Test Commands, this is used so I can reliably get Vscript templates instead of having to look then up on vdc community every time I forget.
+// Added Plans.
+// Added GiveLaserEyes() function (bluelasereyes.nut is now obsolete, do not use.)
+// Added ReturnParm() function, returns what you put into it. This function can be useful when you need to have a second modifier. Ex: ReturnParm(Entities.FindByClassname(null, "env_portal_laser").Destroy())
+// Improved GetPicker() function.
+// Finished Early Colored Partners Demo.
+// Added IdleText.
+// Added forgivingpaint boolean which makes gel more forgiving when set to true.
+// Patched bug within the Connected Portals modification so it doesn't break when a player dies.
+// Fixed SwapTeams Script, can now be run more than once for map transition.
+// Fixed KillPlayer() function.
+// Added more developer modifications.
+// Readded p2mm. Additions: {
+//   Added 'restart' to !vote command for p2mm.
+//   Added 'p2mm' command, makes server say what is typed after '!p2mm'
+//   Added 'playerstrip' command, strips the portalgun from the player specified, supports @a,@o,@b and @s.
+//   Added 24 new tracks to listen to in the lobby.
+//   Improved 'changeteam' command, now supports changing teams of other players and supports team -1 (doesn't work for other players.)
+//   if p2mm_developer is set to '18', p2mm will be disabled. 
+// }
+// Added WIP project for a multiplayer mod server which adds an extra assembly chamber. Support for all assemblers, even ones made with instances. (DOESN'T WORK YET!!)
+// Some other minor bug fixes.
+//
+//// Test Commands:
+//
+// EntFire("!picker","addoutput","OnPressed !activator:ignitelifetime:99999999:0:-1")
+// EntFire("!picker","addoutput","OnPressed !activator:ignitelifetime:0:0:-1")
+// EntFireByHandle("@clientcommand","command","alias +forward say forward",0.0,FindByEntIndex(2),FindByEntIndex(2))
+// EntFireByHandle(ent, input, param, delay, activator, caller)
+// cvar_set ui_pvplobby_friends_invitetime -1
+// cvar_set sv_portal_coop_ping_cooldown_time -1 
+// cvar_set ui_transition_time 0
+//
+//// Plans:
+// NOTE: Priorities go from 1 (might be done, but other things must be completed first.) to 5 (will definitely be fixed, hopefully as soon as possible.)
+/// Priority 5:
+// None.
+/// Priority 4:
+// Finish extra assembler modification. (Priority 4)
+/// Priority 3:
+// Work on Colored Partners mod. (Priority 3)
+// Finish work on Advanced Cooperative Testing Initiative Demo. (Priority 3)
+// Fixing replacetriggerhurt.nut (Priority 3)
+// Fixing movecatapult scripts. (Priority 3)
+// Remove placeportalanywhere.nut, organizing. (priority 3)
+// Remove failed spawning attempt scripts, organizing. (Priority 3)
+// Improve bluelasereyes. (Priority 3)
+// Improve disabletarget.cfg, not listed in SCNS. (Priority 3)
+// Priority: 2
+// Add more mapspawn functions. (Priority 2)
+// Move all setup scripts to a library, organizing. (Priority 2)
+// Move all arbitrary scripts like makecubebouncy.nut and makecubespeedy.nut to mapspawn.nut or library, organizing. (Priority 2)
+// Fix 'LOOKATRED.nut' (Priority 2)
+// Priority: 1
+// Modify keypad map selection script: {
+//   Define Variable by default, not requiring use of kp_reset.
+//   Add Text-based Gui for keypad, not requiring use for console to see map names.
+//   Fix issues with keypad scripts not executing scripts properly.
+// } (Priority 1)
+//// End of comments.
+
 if (GetDeveloperLevel() == 101) {
   return;
 }
 if (!("Entities" in this)) return;
-printl("==== calling mapspawn.nut")
+print("==== calling mapspawn.nut")
+
 IncludeScript("ppmod4.nut")
-IncludeScript("src/pcapture-lib") 
+IncludeScript("src/pcapture-lib")
 IncludeScript("scripttimedelay.nut")
 IncludeScript("atlasradio.nut")
 EntFire("worldspawn","addoutput","paintinmap 1")
 NoclipState <- false
+ReturnParm <- function(parma) {
+  return parma
+}
+GiveLaserEyes <- function(Index = 1, Remove = false) {
+    if (typeof FindByEntIndex(Index) != "instance" && Index != "all" && Index != "@a") {
+        return print("Error: Index must be a valid entindex() of a player or must be \"all\" or \"@a\"")
+    }
+    if (Remove == false) {
+        if (Index == "all" || Index == "@a") {
+            for (local player; player = Entities.FindByClassname(player, "player");) {
+                local laser1 = Entities.CreateByClassname("env_portal_laser")
+                local host = player
+
+                laser1.SetOrigin(host.EyePosition())
+                print(laser1.GetOrigin())
+                print(host.GetOrigin())
+                ppmod.fire(laser1,"turnon")
+                laser1.__KeyValueFromString("targetname","scns_laser" + player.entindex() + "_")
+                local laser1_interval = ppmod.interval(function():(laser1,host,player) {
+                    local traceResult = TracePlus.FromEyes.Cheap(17,player)
+                    laser1.SetOrigin(traceResult.GetHitpos())
+                    local DirectionAngles = entLib.FromEntity(player).EyeAngles()
+                    laser1.SetAngles(DirectionAngles.x,DirectionAngles.y,DirectionAngles.z)
+                },0.01,"scns_laser" + player.entindex() + "_interval_")
+                return
+            }
+        }
+        local host = FindByEntIndex(Index)
+        local laser1 = Entities.CreateByClassname("env_portal_laser")
+        local newblueori = host.GetOrigin()
+
+        laser1.SetOrigin(host.EyePosition())
+        print(laser1.GetOrigin())
+        print(host.GetOrigin())
+        ppmod.fire(laser1,"turnon")
+        laser1.__KeyValueFromString("targetname","scns_laser" + host.entindex() + "_")
+        ppmod.interval(function():(laser1,host,Index) {
+            local traceResult = TracePlus.FromEyes.Cheap(24,FindByEntIndex(Index))
+            laser1.SetOrigin(traceResult.GetHitpos())
+            local DirectionAngles = entLib.FromEntity(FindByEntIndex(Index)).EyeAngles()
+            laser1.SetAngles(DirectionAngles.x,DirectionAngles.y,DirectionAngles.z)
+        },0.01,"scns_laser" + host.entindex() + "_interval_")
+        local laser1_interval = Entities.FindByName(null, "scns_laser" + host.entindex() + "_interval_")
+        local result = {}
+        result[1] = laser1
+        result[2] = laser1_interval
+        return result
+    } else if (Remove == true) {
+        if (Index == "all" || Index == "@a") {
+            for (local player; player = Entities.FindByClassname(player, "player");) {
+                local laser1 = Entities.FindByName(null,"scns_laser" + player.entindex() + "_")
+                local host = player
+                local laser1_interval = Entities.FindByName(null,"scns_laser" + player.entindex() + "_interval_")
+                laser1.Destroy()
+                laser1_interval.Destroy()
+                return
+            }
+        }
+        local host = FindByEntIndex(Index)
+        local laser1 = Entities.FindByName(null,"scns_laser" + host.entindex() + "_")
+        local newblueori = host.GetOrigin()
+        local laser1_interval = Entities.FindByName(null"scns_laser" + host.entindex() + "_interval_")
+        laser1.Destroy()
+        laser1_interval.Destroy()
+        return
+    } else {
+        return print("Error: \"Remove\" parameter must be a boolean between True or False.")
+    }
+    
+}
 MPTP <- function(index1,index2) {
   FindByEntIndex(index1).SetOrigin(FindByEntIndex(index2).GetOrigin())
 }
@@ -25,14 +161,14 @@ PlacePortal <- function(group = 1,portal = 1,pos= "0 0 0",ang = "0 0 0") {
   } else if (typeof pos == "string") {
     pos2 <- pos
   } else {
-    print("WARNING: Must be a Vector or String!")
+    print("WARNING: Portal Position ust be a Vector or String!")
   }
   if (typeof ang == "Vector") {
     ang2 <- ang.x + " " + ang.y + " " + ang.z
   } else if (typeof ang == "string") {
     ang2 <- ang
   } else {
-    print("WARNING: Must be a Vector or String!")
+    print("WARNING: Portal Angles must be a Vector or String!")
   }
   if (group == 1) {
     if (portal == 1) {
@@ -59,34 +195,82 @@ PlacePortal <- function(group = 1,portal = 1,pos= "0 0 0",ang = "0 0 0") {
   }
 }
 SetPlayerModel <- function(Player = 1,Model = null) {
-if (Player == 1) {
-  local ent = null;     
-  while(ent = Entities.FindByName(ent, "blue"))
-  {
-  ent.SetModel(MODEL1)
-  }
-} else {
-  if (Player == 2) {
-    local ent = null;    
-    while(ent = Entities.FindByName(ent, "red"))
+  if (Player == 1) {
+    local ent = null;     
+    while(ent = Entities.FindByName(ent, "blue"))
     {
     ent.SetModel(MODEL1)
     }
   } else {
-    if (Player == 3) {
-      local ent = null;     
-      while(ent = Entities.FindByClassname(ent, "*"))
+    if (Player == 2) {
+      local ent = null;    
+      while(ent = Entities.FindByName(ent, "red"))
+      {
       ent.SetModel(MODEL1)
-      print("should have done it.")
+      }
     } else {
-      print("Defined local instance of Player not specified within the specified range, please select either 1 or 2 for this instance.")
+      if (Player == 3) {
+        local ent = null;     
+        while(ent = Entities.FindByClassname(ent, "*"))
+        {
+          ent.SetModel(MODEL1)
+          print("should have done it.")
+        }
+        
+      } else {
+        print("Defined local instance of Player not specified within the specified range, please select either 1 or 2 for this instance.")
+      }
     }
   }
 }
-}
-GetPicker <- function() {
-  EntFire("!picker","runscriptcode","::scns_picker <- self")
-  return scns_picker
+GetPicker <- function(PlayerIndex = 1,ignoreinvis = true,DebugMode = false) {
+  // EntFire("!picker","runscriptcode","::scns_picker <- self")
+  // return scns_picker
+  /// ^^^ OLD METHOD!!!
+  // print(PlayerIndex)
+  if (ignoreinvis == true) {
+    local traceSettings = TracePlus.Settings.new({
+        ignoreClasses = arrayLib.new("worldspawn","func_brush","func_detail","info_target","trigger_catapult","trigger_playerteam","trigger_once","trigger_multiple","trigger_hurt","logic_auto","logic_relay","light","env_cubemap","trigger_portal_cleanser","trigger_push","trigger_teleport","env_fade","ambient_generic","logic_branch","env_texturetoggle","env_instructor_hint","env_sprite","func_instance_io_proxy","light_spot","info_overlay","math_counter","env_soundscape","logic_coop_manager","physicsclonearea"),
+        errorTolerance = 100
+    })
+    local traceResult = TracePlus.FromEyes.Bbox(1024, FindByEntIndex(PlayerIndex), null, traceSettings)
+    if (traceResult.DidHit()) {
+      local traceent = traceResult.GetEntity()
+      if (DebugMode == true) {
+        print(FindByEntIndex(traceent.GetIndex()))
+        print(traceResult.GetEntityClassname())
+      }
+      if (traceResult.DidHitWorld() == false) {
+        return FindByEntIndex(traceent.GetIndex())
+      } else if (DebugMode == true) {
+        print("hit world.")
+      }
+    } else if (DebugMode == true) {
+        print("didn't hit anything.")
+    }
+  } else if (ignoreinvis == false) {
+    local traceSettings = TracePlus.Settings.new({
+        ignoreClasses = arrayLib.new("worldspawn","func_brush","func_detail","info_target"),
+        errorTolerance = 100
+    })
+    local traceResult = TracePlus.FromEyes.Bbox(1024, FindByEntIndex(PlayerIndex), null, traceSettings)
+    if (traceResult.DidHit()) {
+      local traceent = traceResult.GetEntity()
+      if (DebugMode == true) {
+        print(FindByEntIndex(traceent.GetIndex()))
+        print(traceResult.GetEntityClassname())
+      }
+      if (traceResult.DidHitWorld() == false) {
+        return FindByEntIndex(traceent.GetIndex())
+      } else if (DebugMode == true) {
+        print("hit world.")
+      }
+    } else if (DebugMode == true) {
+        print("didn't hit anything.")
+    }
+  } else if (DebugMode == true) {
+    print("ignoreinvis parameter is invalid")
+  }
 }
 // B9TC <- function(base9Str) {
 //     // Convert a base 9 string to an integer
@@ -132,7 +316,7 @@ GetPicker <- function() {
 // }
 // // local numberString = "12024024021"; // Example input representing "cool"
 //
-// The scripts are broken.
+// These scripts are broken.
 
 FindObject <- function(ent) {
 local hint = entLib.CreateByClassname("env_instructor_hint", {
@@ -157,6 +341,65 @@ local hint = entLib.CreateByClassname("env_instructor_hint", {
 ppmodhint <- ppmod.get(hint.GetName())
 ppmod.fire(ppmodhint,"ShowHint")
 }
+changeteam <- function(p,args) {
+  try {
+      if (args == "0" || args == "2" || args == "3" || args == "-1") {
+          if (p.GetTeam() == args.tointeger()) {
+              return SendChatMessage("[ERROR] Already on this team!", p)
+          } else if (args == "-1") { 
+              p.SetTeam(0)
+              ppmod.fire(p,"addoutput","teamnumber -1")
+              return SendChatMessage("[ERROR] Team is now set to TEAM_BETA.", p)
+          } else {
+              p.SetTeam(args.tointeger())
+              return SendChatMessage("Team is now set to " + teams[args.tointeger()] + ".", p)
+          }
+      }
+      // No argument, so just cycle through the teams
+      if (args.len() == 0|| args == "") {
+          local iNewTeam = null
+          switch (p.GetTeam()) {
+              case 0: iNewTeam = 2;    break;
+              case 2:          iNewTeam = 3;   break;
+              case 3: iNewTeam = 0;   break;
+              case -1: iNewTeam = 3
+          }
+          p.SetTeam(iNewTeam)
+          SendChatMessage("Toggled to " + teams[iNewTeam] + " team.", p)
+      } else {
+        SendChatMessage("[ERROR] Enter a valid team number: 0, 2, or 3!", p)
+      }
+  } catch (exception) {
+      // No argument, so just cycle through the teams
+      if (args.len() == 0|| args == "") {
+          local iNewTeam = null
+          switch (p.GetTeam()) {
+              case TEAM_SINGLEPLAYER: iNewTeam = TEAM_RED;    break;
+              case TEAM_RED:          iNewTeam = TEAM_BLUE;   break;
+              case TEAM_BLUE: iNewTeam = TEAM_SINGLEPLAYER;   break;
+              case -1: iNewTeam = TEAM_BLUE
+          }
+          p.SetTeam(iNewTeam)
+          SendChatMessage("Toggled to " + teams[iNewTeam] + " team.", p)
+      }
+  } 
+}
+PlayerStrip <- function(Player = 1) {
+  if (typeof Player == "integer") {
+    local portalgun = FindByIntHandle("weapon_portalgun",Player)
+    ppmod.fire(portalgun,"addoutput","canfireportal1 0")
+    ppmod.fire(portalgun,"addoutput","canfireportal2 0")
+  } else if (typeof Player == "instance") {
+    local portalgun = FindByIntHandle("weapon_portalgun",Player.entindex())
+    ppmod.fire(portalgun,"addoutput","canfireportal1 0")
+    ppmod.fire(portalgun,"addoutput","canfireportal2 0")
+  } else if (typeof Player == "string") {
+    local portalgun = FindByIntHandle("weapon_portalgun",FindPlayerByName(Player).entindex())
+    ppmod.fire(portalgun,"addoutput","canfireportal1 0")
+    ppmod.fire(portalgun,"addoutput","canfireportal2 0")
+    SendChatMessage(portalgun)
+  }
+}
 SetLobbyMovie <- function(moviename) {
 if (GetMapName() == "mp_coop_lobby_3"||GetMapName() == "mp_coop_lobby_2") {
   EntFire("case_screen_flip", "Kill")
@@ -180,6 +423,26 @@ if (ent_index == "null") {
     }
   }    
 }
+}
+FindByIntHandle <- function(className, IntHandle) {
+    local ent = null;
+    local count = 1;
+    if (className == "null" || IntHandle == "null") {
+      return printl("KeyValue not specified!")
+    }
+
+    local entity = Entities.First();
+    while (entity != null) {
+        if (entity.GetClassname() == className) {
+            if (count == IntHandle) {
+                ent = entity;
+                break;
+            }
+            count++;
+        }
+        entity = Entities.Next(entity); 
+    }
+    return ent;
 }
 FindByKeyValue <- function(key = "null",val = "null") {
 Print("Experimental!")
@@ -206,21 +469,25 @@ if (PlayerIndex == "null") {
   PlayerInstance.SetTeam(Team)   
 }
 }
-KillPlayer <- function(PlayerIndex = "both") {
-if (PlayerIndex == "both") {
-  ppmod.fire(FindByEntIndex(1),"sethealth",-100);
-  ppmod.fire(FindByEntIndex(2),"sethealth",-100);
-} else if ("red") {
-  ppmod.fire(FindByEntIndex(2),"sethealth",-100);
-} else if ("blue") {
-  ppmod.fire(FindByEntIndex(1),"sethealth",-100);
-} else if ("orange") {
-  ppmod.fire(FindByEntIndex(2),"sethealth",-100);
-} else{
-  local PlayerInstance = FindByEntIndex(PlayerIndex)
-  ppmod.fire(PlayerInstance,"sethealth",-100);
-  
-}
+KillPlayer <- function(PlayerIndex = "all") {
+  if (PlayerIndex == "both") {
+    ppmod.fire(FindByEntIndex(1),"sethealth",-100);
+    ppmod.fire(FindByEntIndex(2),"sethealth",-100);
+  } else if (PlayerIndex == "red") {
+    ppmod.fire(FindByEntIndex(2),"sethealth",-100);
+  } else if (PlayerIndex == "blue") {
+    ppmod.fire(FindByEntIndex(1),"sethealth",-100);
+  } else if (PlayerIndex == "orange") {
+    ppmod.fire(FindByEntIndex(2),"sethealth",-100);
+  } else if (PlayerIndex == "all") {
+    for (local player; player = Entities.FindByClassname(player, "player");) {
+      ppmod.fire(player,"sethealth",-100)
+    }
+  } else {
+    local PlayerInstance = FindByEntIndex(PlayerIndex)
+    ppmod.fire(PlayerInstance,"sethealth",-100);
+    
+  }
 }
 SwapPlayerThing <- function(extraplayers = 0) {
   if (typeof extraplayers != "integer") {
@@ -240,19 +507,32 @@ SwapPlayerThing <- function(extraplayers = 0) {
   // bluep1.SetOrigin(bluep2.GetOrigin())
   // bluep2.SetOrigin(bluep1.GetOrigin())
 }
-
 idletext <- false
-  ppmod.interval(function() {
-    IncludeScript("ppmod3.nut");
-    if (idletext == true) {
-      scns_txt <- ppmod.text("Server is idle.");
-      scns_txt.SetPosition(0.005,0.925)
-      scns_txt.SetColor("0 255 0", "0 0 0");
-      scns_txt.Display(1);
-      ppmod.keyval(scns_txt.GetEntity,"channel","8")
-    }
-  },1,"scns_idletext") 
+forgivingpaint <- false
+scns_ignorevariable1 <- false //Ignore.
+
  ppmod.onauto(async(function () {
+  ppmod.interval(function() {
+  IncludeScript("ppmod3.nut");
+  if (idletext == true) {
+    scns_txt <- ppmod.text("Server is idle.");
+    scns_txt.SetPosition(0.005,0.925)
+    scns_txt.SetColor("0 255 0", "0 0 0");
+    scns_txt.Display(1);
+    ppmod.keyval(scns_txt.GetEntity,"channel","8")
+  }
+  if (forgivingpaint == true && scns_ignorevariable1 == false) {
+      ppmod.getall(["info_paint_sprayer"],function(ent_a) {
+        ppmod.fire(ent_a,"addoutput","blob_spread_radius 32")
+        ppmod.fire(ent_a,"addoutput","blob_streak_percentage 100")
+        ppmod.fire(ent_a,"addoutput","min_streak_speed_dampen 50")
+        ppmod.fire(ent_a,"addoutput","max_streak_speed_dampen 150")
+        ppmod.fire(ent_a,"addoutput","min_streak_time 8")
+        ppmod.fire(ent_a,"addoutput","max_streak_time 8")    
+      })
+      scns_ignorevariable1 <- true
+    }
+  },1,"scns_maininterval") 
   ::pgun1 <- ppmod.get("weapon_portalgun")
   ::pgun2 <- ppmod.get("weapon_portalgun",pgun1)
   EntFire("worldspawn","addoutput","paintinmap 1")
@@ -270,7 +550,7 @@ idletext <- false
     return cube;
   }
 if (GetDeveloperLevel() == 3) {
-    ppmod.player
+    // ppmod.player
     ppmod.interval(function ():(red) {
 
     local feetpos = red.GetOrigin() - Vector(0, 0, 18);
@@ -416,7 +696,7 @@ if (GetDeveloperLevel() == 3) {
       }
     },0.0,-1,true);
     // Final Text
-    local txt = ppmod.text("Welcome to the Colored Players Mod.");
+    local txt = ppmod.text("Welcome to the Colored Partners Mod.");
     txt.SetColor("255 0 0", "255 255 255");
     txt.SetFade(0.1, 2, true);
     txt.Display(3); //display the text
@@ -498,12 +778,12 @@ if (GetDeveloperLevel() == 3) {
       ppmod.fire("timer_3","Reset",0)
       ppmod.fire("switch_door_2_indicator","reset")
     })
-    // Blue Color
+
+    // Blue color
 
     ppmod.interval(function() {
       ppmod.fire("prop_weighted_cube","color","0 0 255")
     },1.5)
-
     ::cubeStates <- {};
     local pingblue1 = Entities.CreateByClassname("info_player_ping_detector");
     ppmod.fire(pingblue1,"enable")
@@ -513,185 +793,695 @@ if (GetDeveloperLevel() == 3) {
       ppmod.getall(["prop_weighted_cube"],function (cube) { /////////////////////////////////////////////1
       local blue = ppmod.get("blue");
       local red = ppmod.get("red");
-      ppmodeye <- function(playername) {
-            // Set up a logic_measure_movement for more accurate view angles
-      ::pplayereyes <- Entities.CreateByClassname("logic_measure_movement");
-      local eyename = UniqueString("ppmod_eyes");
-
-      ppmod.keyval(pplayereyes,"MeasureType", 1);
-      ppmod.keyval(pplayereyes,"Targetname", eyename);
-      ppmod.keyval(pplayereyes,"TargetReference", eyename);
-      ppmod.keyval(pplayereyes,"Target", eyename);
-      pplayereyes.SetAngles(0, 0, 90.0);
-
-      EntFireByHandle(pplayereyes, "SetMeasureReference", eyename, 0.0, null, null);
-      EntFireByHandle(pplayereyes, "Enable", "", 0.0, null, null);
-
-      // logic_measure_movement relies on targetname for selecting entities
-      // This changes the player's targetname briefly and set it back right away
-      ::pplayerreplacementname <- UniqueString("pplayer")
-        
-        ppmod.keyval(ppmod.get(playername),"Targetname", pplayerreplacementname);
-        
-        EntFireByHandle(pplayereyes, "SetMeasureTarget",pplayerreplacementname, 0.0, null, null);
-
-        ppmod.wait(function ():(pplayerreplacementname) {
-          ppmod.keyval(ppmod.get(pplayerreplacementname),"Targetname", "blue");
-          pplayereyes.Destroy()
-        }, FrameTime());
-
-
-    return pplayereyes
-  }
-  IncludeScript("src/pcapture-lib")
-      local pplayereyes = ppmodeye("blue")
       print("cubeishere!")
-      ::cubeIndex <- cube.entindex();
-       local start = pplayereyes.GetOrigin();
-       local end = start + pplayereyes.GetForwardVector() * 256;
-       local portal = null, portals = [];
-       while (portal = ppmod.get("prop_portal", portal)) portals.push(portal);
-       // If the ray didn't intersect anything, don't draw a box.
-       local ray = ppmod.ray(start, end, cube, true, portal)
-        local traceSettings = TracePlus.Settings.new({
-          ignoreClasses = arrayLib.new("worldspawn")
-          priorityClasses  = arrayLib.new("prop_weighted_cube"),
-        })
-       local traceResult = TracePlus.FromEyes.Bbox(256, pcapEntity(blue),null,traceSettings)
-       if (traceResult.DidHit()) {
-           local hitEntity = traceResult.GetEntity()
-       if (hitEntity) {
-           printl("Trace hit entity:" + hitEntity.GetClassname())
-          if (hitEntity == cube) {
+      local cubeIndex = cube.entindex();
+      local traceSettings = TracePlus.Settings.new({
+          priorityClasses = arrayLib.new("prop_weighted_cube"),
+          errorTolerance = 100
+      })
+      local traceResult = TracePlus.FromEyes.Bbox(1024, FindByEntIndex(1), null, traceSettings)
+      if (traceResult.DidHit()) {
+        local traceent = traceResult.GetEntity()
+        print(traceent.GetIndex())
+          if (traceResult.DidHitWorld() == false && FindByEntIndex(traceent.GetIndex()) == cube) {
+            print("looking at a cube!")
             local currentcubestate = macros.GetFromTable(cubeStates, cubeIndex, false)
-          if (currentcubestate == false) {
-            ppmod.fire(cube,"disablemotion");
-             cubeStates[cubeIndex.tointeger()] <- true;
-          } else if (currentcubestate == true) {
-            ppmod.fire(cube,"enablemotion");
-            cubeStates[cubeIndex.tointeger()] <- false;
-          } 
-        print("found it, no freeze tho")
+            if (currentcubestate == false) {
+              ppmod.fire(cube,"disablemotion");
+              ppmod.fire(cube,"disablepickup");
+              cubeStates[cubeIndex.tointeger()] <- true;
+            } else if (currentcubestate == true) {
+              ppmod.fire(cube,"enablemotion");
+              ppmod.fire(cube,"enablepickup");
+              cubeStates[cubeIndex.tointeger()] <- false;
+            } 
+          } else {
+            print("hit world.")
+            print(traceResult.GetEntityClassname())
+            print(traceResult.GetEntity())
+            print(cube)
           }
-       } else {
-           printl("Trace hit the world.")
-       }
-       } else {print("nointersect")}
-
-        /*
-       // If the ray hit a cube, draw a green box. Otherwise, draw a red box.
-       if (ray.entity) {
-        if (GetDeveloperLevel() == 5.6) {
-          DebugDrawBox(ray.point, Vector(-2, -2, -2), Vector(2, 2, 2), 0, 255, 0, 100, -1);
-        }
-        local currentcubestate = macros.GetFromTable(cubeStates, cubeIndex, false)
-         if (currentcubestate == false) {
-          ppmod.fire(cube,"disablemotion");
-          cubeStates[cubeIndex.tointeger()] <- true;
-         } else if (currentcubestate == true) {
-          ppmod.fire(cube,"enablemotion");
-          cubeStates[cubeIndex.tointeger()] <- false;
-         } 
-        print("found it, no freeze tho")
-       } else {
-         if (GetDeveloperLevel() == 5.6) {
-          DebugDrawBox(ray.point, Vector(-2, -2, -2), Vector(2, 2, 2), 255, 0, 0, 100, -1);
-        }
-        print("not found")
-       }
-       */
+      } else {
+          print("didn't hit anything.")
+      }
       
     })//end of cube hook function
   })//end of entire script for info ping detector
-  }//end of level
+    local pingred1 = Entities.CreateByClassname("info_player_ping_detector");
+    ppmod.fire(pingred1,"enable")
+    ppmod.keyval(pingred1,"TeamToLookAt","2")
+    ppmod.addscript(pingred1, "OnPingDetected",function() {
+      print("pingdetected")
+      ppmod.getall(["prop_weighted_cube"],function (cube) { /////////////////////////////////////////////1
+      local blue = ppmod.get("blue");
+      local red = ppmod.get("red");
+      print("cubeishere!")
+      local cubeIndex = cube.entindex();
+      local traceSettings = TracePlus.Settings.new({
+          priorityClasses = arrayLib.new("prop_weighted_cube"),
+          errorTolerance = 100
+      })
+      local traceResult = TracePlus.FromEyes.Bbox(1024, FindByEntIndex(2), null, traceSettings)
+      if (traceResult.DidHit()) {
+        local traceent = traceResult.GetEntity()
+        print(traceent.GetIndex())
+          if (traceResult.DidHitWorld() == false && FindByEntIndex(traceent.GetIndex()) == cube) {
+            print("looking at a cube!")
+            local currentcubestate = macros.GetFromTable(cubeStates, cubeIndex, false)
+            if (currentcubestate == false) {
+              ppmod.fire(cube,"disablemotion");
+              ppmod.fire(cube,"disablepickup");
+              cubeStates[cubeIndex.tointeger()] <- true;
+            } else if (currentcubestate == true) {
+              ppmod.fire(cube,"enablemotion");
+              ppmod.fire(cube,"enablepickup");
+              cubeStates[cubeIndex.tointeger()] <- false;
+            } 
+          } else {
+            print("hit world.")
+            print(traceResult.GetEntityClassname())
+            print(traceResult.GetEntity())
+            print(cube)
+          }
+      } else {
+          print("didn't hit anything.")
+      }
+      
+    })//end of cube hook function 2
+  })//end of entire script for info ping detector 2
+  } else if (GetMapName() == "mp_coop_laser_2") {
+    // Setup EntFires
+
+    EntFire("InstanceAuto27-red_dropper-cube_dropper_prop","color","0 255 0")
+    EntFire("InstanceAuto27-blue_dropper-cube_dropper_prop","color","255 0 0")
+    EntFire("button_arms-button","color","0 255 0")
+    EntFire("blue-station","color","255 0 0")
+    EntFire("orange-station","color","0 255 0")
+    EntFire("reflectocube_dropper_prop","color","0 0 255")
+    EntFire("npc_portal_turret_floor","color","255 0 0")
+    EntFire("npc_portal_turret_floor","addoutput","UseSuperDamageScale 1")
+    EntFire("prop_laser_catcher","color","0 0 255")
+    EntFire("button_1","color","0 0 255")
+    EntFire("prop_laser_relay","color","0 0 255")
+    EntFire("@exit_door","color","0 0 255")
+    EntFire("airlock_1-blue_dropper-cube_dropper_prop","color","255 0 0")
+    EntFire("airlock_1-red_dropper-cube_dropper_prop","color","0 255 0")
+    EntFire("coop_man_give_taunt","kill")
+
+    // Setup Outputs
+
+    ppmod.addscript("button_arms-button","OnPressed",function(activator,caller) {
+      if (activator.GetName() != "red") {
+        ppmod.fire("button_arms-button","pressout")
+      }
+    },0.0,-1,true)
+
+    // Blue color
+
+    ppmod.interval(function() {
+      ppmod.fire("prop_weighted_cube","color","0 0 255")
+    },1.5)
+    ::cubeStates <- {};
+    local pingblue1 = Entities.CreateByClassname("info_player_ping_detector");
+    ppmod.fire(pingblue1,"enable")
+    ppmod.keyval(pingblue1,"TeamToLookAt","3")
+    ppmod.addscript(pingblue1, "OnPingDetected",function() {
+      print("pingdetected")
+      ppmod.getall(["prop_weighted_cube"],function (cube) { /////////////////////////////////////////////1
+      local blue = ppmod.get("blue");
+      local red = ppmod.get("red");
+      print("cubeishere!")
+      local cubeIndex = cube.entindex();
+      local traceSettings = TracePlus.Settings.new({
+          priorityClasses = arrayLib.new("prop_weighted_cube"),
+          errorTolerance = 100
+      })
+      local traceResult = TracePlus.FromEyes.Bbox(1024, FindByEntIndex(1), null, traceSettings)
+      if (traceResult.DidHit()) {
+        local traceent = traceResult.GetEntity()
+        print(traceent.GetIndex())
+          if (traceResult.DidHitWorld() == false && FindByEntIndex(traceent.GetIndex()) == cube) {
+            print("looking at a cube!")
+            local currentcubestate = macros.GetFromTable(cubeStates, cubeIndex, false)
+            if (currentcubestate == false) {
+              ppmod.fire(cube,"disablemotion");
+              ppmod.fire(cube,"disablepickup");
+              cubeStates[cubeIndex.tointeger()] <- true;
+            } else if (currentcubestate == true) {
+              ppmod.fire(cube,"enablemotion");
+              ppmod.fire(cube,"enablepickup");
+              cubeStates[cubeIndex.tointeger()] <- false;
+            } 
+          } else {
+            print("hit world.")
+            print(traceResult.GetEntityClassname())
+            print(traceResult.GetEntity())
+            print(cube)
+          }
+      } else {
+          print("didn't hit anything.")
+      }
+      
+    })//end of cube hook function
+  })//end of entire script for info ping detector
+    local pingred1 = Entities.CreateByClassname("info_player_ping_detector");
+    ppmod.fire(pingred1,"enable")
+    ppmod.keyval(pingred1,"TeamToLookAt","2")
+    ppmod.addscript(pingred1, "OnPingDetected",function() {
+      print("pingdetected")
+      ppmod.getall(["prop_weighted_cube"],function (cube) { /////////////////////////////////////////////1
+      local blue = ppmod.get("blue");
+      local red = ppmod.get("red");
+      print("cubeishere!")
+      local cubeIndex = cube.entindex();
+      local traceSettings = TracePlus.Settings.new({
+          priorityClasses = arrayLib.new("prop_weighted_cube"),
+          errorTolerance = 100
+      })
+      local traceResult = TracePlus.FromEyes.Bbox(1024, FindByEntIndex(2), null, traceSettings)
+      if (traceResult.DidHit()) {
+        local traceent = traceResult.GetEntity()
+        print(traceent.GetIndex())
+          if (traceResult.DidHitWorld() == false && FindByEntIndex(traceent.GetIndex()) == cube) {
+            print("looking at a cube!")
+            local currentcubestate = macros.GetFromTable(cubeStates, cubeIndex, false)
+            if (currentcubestate == false) {
+              ppmod.fire(cube,"disablemotion");
+              ppmod.fire(cube,"disablepickup");
+              cubeStates[cubeIndex.tointeger()] <- true;
+            } else if (currentcubestate == true) {
+              ppmod.fire(cube,"enablemotion");
+              ppmod.fire(cube,"enablepickup");
+              cubeStates[cubeIndex.tointeger()] <- false;
+            } 
+          } else {
+            print("hit world.")
+            print(traceResult.GetEntityClassname())
+            print(traceResult.GetEntity())
+            print(cube)
+          }
+      } else {
+          print("didn't hit anything.")
+      }
+      
+    })//end of cube hook function 2
+  })//end of entire script for info ping detector 2
+  } else if (GetMapName() == "mp_coop_rat_maze") {
+    // Setup EntFires
+
+    EntFire("prop_laser_catcher","color","0 0 255")
+    ppmod.fire(ppmod.get("prop_floor_button"),"color","0 255 0")
+    ppmod.fire(ppmod.get("prop_floor_button",ppmod.get("prop_floor_button")),"color","255 0 0")
+    EntFire("@exit_door","color","0 0 255")
+    EntFire("InstanceAuto7-red_dropper-cube_dropper_prop","color","0 255 0")
+    EntFire("InstanceAuto7-blue_dropper-cube_dropper_prop","color","255 0 0")
+    EntFire("blue-station","color","255 0 0")
+    EntFire("orange-station","color","0 255 0")
+
+    // Setup Outputs
+
+    ppmod.addscript(ppmod.get("prop_floor_button"),"OnPressed",function(activator,caller) {
+      if (activator.GetName() != "red") {
+        ppmod.fire(ppmod.get("prop_floor_button"),"pressout")
+        EntFire("level_counter","subtract","1")
+        ppmod.wait(function() {
+          EntFire("RatCrusher","setposition","0.5")
+        },0.05)
+      }
+    },0.0,-1,true)
+    ppmod.addscript(ppmod.get("prop_floor_button"),"OnUnPressed",function(activator,caller) {
+      if (activator.GetName() != "red") {
+        EntFire("level_counter","add","1")
+        ppmod.wait(function() {
+          EntFire("RatCrusher","setposition","0.5")
+        },0.05)
+      }
+    },0.0,-1,true)
+    ppmod.addscript(ppmod.get("prop_floor_button",ppmod.get("prop_floor_button")),"OnPressed",function(activator,caller) {
+      if (activator.GetName() != "blue") {
+        ppmod.fire(ppmod.get("prop_floor_button",ppmod.get("prop_floor_button")),"pressout")
+        EntFire("level_counter","subtract","1")
+        ppmod.wait(function() {
+          EntFire("RatCrusher","setposition","0.5")
+        },0.05)
+      }
+    },0.0,-1,true)
+    ppmod.addscript(ppmod.get("prop_floor_button",ppmod.get("prop_floor_button")),"OnUnPressed",function(activator,caller) {
+      if (activator.GetName() != "blue") {
+        EntFire("level_counter","add","1")
+        ppmod.wait(function() {
+          EntFire("RatCrusher","setposition","0.5")
+        },0.05)
+      }
+    },0.0,-1,true)
+
+    // Blue color
+
+    ppmod.interval(function() {
+      ppmod.fire("prop_weighted_cube","color","0 0 255")
+    },1.5)
+    ::cubeStates <- {};
+    local pingblue1 = Entities.CreateByClassname("info_player_ping_detector");
+    ppmod.fire(pingblue1,"enable")
+    ppmod.keyval(pingblue1,"TeamToLookAt","3")
+    ppmod.addscript(pingblue1, "OnPingDetected",function() {
+      print("pingdetected")
+      ppmod.getall(["prop_weighted_cube"],function (cube) { /////////////////////////////////////////////1
+      local blue = ppmod.get("blue");
+      local red = ppmod.get("red");
+      print("cubeishere!")
+      local cubeIndex = cube.entindex();
+      local traceSettings = TracePlus.Settings.new({
+          priorityClasses = arrayLib.new("prop_weighted_cube"),
+          errorTolerance = 100
+      })
+      local traceResult = TracePlus.FromEyes.Bbox(1024, FindByEntIndex(1), null, traceSettings)
+      if (traceResult.DidHit()) {
+        local traceent = traceResult.GetEntity()
+        print(traceent.GetIndex())
+          if (traceResult.DidHitWorld() == false && FindByEntIndex(traceent.GetIndex()) == cube) {
+            print("looking at a cube!")
+            local currentcubestate = macros.GetFromTable(cubeStates, cubeIndex, false)
+            if (currentcubestate == false) {
+              ppmod.fire(cube,"disablemotion");
+              ppmod.fire(cube,"disablepickup");
+              cubeStates[cubeIndex.tointeger()] <- true;
+            } else if (currentcubestate == true) {
+              ppmod.fire(cube,"enablemotion");
+              ppmod.fire(cube,"enablepickup");
+              cubeStates[cubeIndex.tointeger()] <- false;
+            } 
+          } else {
+            print("hit world.")
+            print(traceResult.GetEntityClassname())
+            print(traceResult.GetEntity())
+            print(cube)
+          }
+      } else {
+          print("didn't hit anything.")
+      }
+      
+    })//end of cube hook function
+  })//end of entire script for info ping detector
+    local pingred1 = Entities.CreateByClassname("info_player_ping_detector");
+    ppmod.fire(pingred1,"enable")
+    ppmod.keyval(pingred1,"TeamToLookAt","2")
+    ppmod.addscript(pingred1, "OnPingDetected",function() {
+      print("pingdetected")
+      ppmod.getall(["prop_weighted_cube"],function (cube) { /////////////////////////////////////////////1
+      local blue = ppmod.get("blue");
+      local red = ppmod.get("red");
+      print("cubeishere!")
+      local cubeIndex = cube.entindex();
+      local traceSettings = TracePlus.Settings.new({
+          priorityClasses = arrayLib.new("prop_weighted_cube"),
+          errorTolerance = 100
+      })
+      local traceResult = TracePlus.FromEyes.Bbox(1024, FindByEntIndex(2), null, traceSettings)
+      if (traceResult.DidHit()) {
+        local traceent = traceResult.GetEntity()
+        print(traceent.GetIndex())
+          if (traceResult.DidHitWorld() == false && FindByEntIndex(traceent.GetIndex()) == cube) {
+            print("looking at a cube!")
+            local currentcubestate = macros.GetFromTable(cubeStates, cubeIndex, false)
+            if (currentcubestate == false) {
+              ppmod.fire(cube,"disablemotion");
+              ppmod.fire(cube,"disablepickup");
+              cubeStates[cubeIndex.tointeger()] <- true;
+            } else if (currentcubestate == true) {
+              ppmod.fire(cube,"enablemotion");
+              ppmod.fire(cube,"enablepickup");
+              cubeStates[cubeIndex.tointeger()] <- false;
+            } 
+          } else {
+            print("hit world.")
+            print(traceResult.GetEntityClassname())
+            print(traceResult.GetEntity())
+            print(cube)
+          }
+      } else {
+          print("didn't hit anything.")
+      }
+      
+    })//end of cube hook function 2
+  })//end of entire script for info ping detector 2
+  } else if (GetMapName() == "mp_coop_laser_crusher") {
+    // Pre-Setup Things
+
+    ::scns_cpm_pickupstate <- true
+
+    // Setup EntFires
+    EntFire("AutoInstance2-reflectocube_dropper_prop","color","0 0 255")
+    ppmod.fire(ppmod.get("prop_laser_catcher",ppmod.get("prop_laser_catcher")),"color","0 255 0")
+    ppmod.fire(ppmod.get("prop_laser_catcher",ppmod.get("prop_laser_catcher",ppmod.get("prop_laser_catcher"))),"color","255 0 0")
+    EntFire("InstanceAuto34-red_dropper-cube_dropper_prop","color","0 255 0")
+    EntFire("InstanceAuto34-blue_dropper-cube_dropper_prop","color","255 0 0")
+    EntFire("InstanceAuto8-blue-station","color","255 0 0")
+    EntFire("InstanceAuto8-orange-station","color","0 255 0")
+    // Colored Laser Catchers
+    ppmod.interval(function() {
+      ppmod.getall(["prop_weighted_cube"],function (cubea) {
+        ppmod.addscript(cubea,"OnBluePickup",function() {
+          ::scns_cpm_pickupstate <- true
+          print("bluepickup")
+        })
+        ppmod.addscript(cubea,"OnOrangePickup",function() {
+          ::scns_cpm_pickupstate <- false
+          print("orangepickup")
+          print(scns_cpm_pickupstate)
+        })
+      })
+    },3)
+    ppmod.addscript(ppmod.get("prop_laser_catcher",ppmod.get("prop_laser_catcher")),"OnPowered",function() {
+      if (scns_cpm_pickupstate == true) {
+        EntFire("crusher_1_close_rl","trigger","",0.05)
+      }
+      print(scns_cpm_pickupstate)
+    })
+    ppmod.addscript(ppmod.get("prop_laser_catcher",ppmod.get("prop_laser_catcher",ppmod.get("prop_laser_catcher"))),"OnPowered",function() {
+      if (scns_cpm_pickupstate == false) {
+        EntFire("soup_platform_close_rl","trigger","",0.05)
+      }
+      print(scns_cpm_pickupstate)
+    })
+    ppmod.addscript(ppmod.get("prop_laser_catcher",ppmod.get("prop_laser_catcher")),"OnUnPowered",function() {
+      if (scns_cpm_pickupstate == true) {
+        EntFire("crusher_1_close_rl","trigger","",0.05)
+      }
+      print(scns_cpm_pickupstate)
+    })
+    ppmod.addscript(ppmod.get("prop_laser_catcher",ppmod.get("prop_laser_catcher",ppmod.get("prop_laser_catcher"))),"OnUnPowered",function() {
+      if (scns_cpm_pickupstate == false) {
+        EntFire("soup_platform_close_rl","trigger","",0.05)
+      }
+      print(scns_cpm_pickupstate)
+    })
+
+    // Blue color
+
+    ppmod.interval(function() {
+      ppmod.fire("prop_weighted_cube","color","0 0 255")
+    },1.5)
+    ::cubeStates <- {};
+    local pingblue1 = Entities.CreateByClassname("info_player_ping_detector");
+    ppmod.fire(pingblue1,"enable")
+    ppmod.keyval(pingblue1,"TeamToLookAt","3")
+    ppmod.addscript(pingblue1, "OnPingDetected",function() {
+      print("pingdetected")
+      ppmod.getall(["prop_weighted_cube"],function (cube) { /////////////////////////////////////////////1
+      local blue = ppmod.get("blue");
+      local red = ppmod.get("red");
+      print("cubeishere!")
+      local cubeIndex = cube.entindex();
+      local traceSettings = TracePlus.Settings.new({
+          priorityClasses = arrayLib.new("prop_weighted_cube"),
+          errorTolerance = 100
+      })
+      local traceResult = TracePlus.FromEyes.Bbox(1024, FindByEntIndex(1), null, traceSettings)
+      if (traceResult.DidHit()) {
+        local traceent = traceResult.GetEntity()
+        print(traceent.GetIndex())
+          if (traceResult.DidHitWorld() == false && FindByEntIndex(traceent.GetIndex()) == cube) {
+            print("looking at a cube!")
+            local currentcubestate = macros.GetFromTable(cubeStates, cubeIndex, false)
+            if (currentcubestate == false) {
+              ppmod.fire(cube,"disablemotion");
+              ppmod.fire(cube,"disablepickup");
+              cubeStates[cubeIndex.tointeger()] <- true;
+            } else if (currentcubestate == true) {
+              ppmod.fire(cube,"enablemotion");
+              ppmod.fire(cube,"enablepickup");
+              cubeStates[cubeIndex.tointeger()] <- false;
+            } 
+          } else {
+            print("hit world.")
+            print(traceResult.GetEntityClassname())
+            print(traceResult.GetEntity())
+            print(cube)
+          }
+      } else {
+          print("didn't hit anything.")
+      }
+      
+    })//end of cube hook function
+  })//end of entire script for info ping detector
+    local pingred1 = Entities.CreateByClassname("info_player_ping_detector");
+    ppmod.fire(pingred1,"enable")
+    ppmod.keyval(pingred1,"TeamToLookAt","2")
+    ppmod.addscript(pingred1, "OnPingDetected",function() {
+      print("pingdetected")
+      ppmod.getall(["prop_weighted_cube"],function (cube) { /////////////////////////////////////////////1
+      local blue = ppmod.get("blue");
+      local red = ppmod.get("red");
+      print("cubeishere!")
+      local cubeIndex = cube.entindex();
+      local traceSettings = TracePlus.Settings.new({
+          priorityClasses = arrayLib.new("prop_weighted_cube"),
+          errorTolerance = 100
+      })
+      local traceResult = TracePlus.FromEyes.Bbox(1024, FindByEntIndex(2), null, traceSettings)
+      if (traceResult.DidHit()) {
+        local traceent = traceResult.GetEntity()
+        print(traceent.GetIndex())
+          if (traceResult.DidHitWorld() == false && FindByEntIndex(traceent.GetIndex()) == cube) {
+            print("looking at a cube!")
+            local currentcubestate = macros.GetFromTable(cubeStates, cubeIndex, false)
+            if (currentcubestate == false) {
+              ppmod.fire(cube,"disablemotion");
+              ppmod.fire(cube,"disablepickup");
+              cubeStates[cubeIndex.tointeger()] <- true;
+            } else if (currentcubestate == true) {
+              ppmod.fire(cube,"enablemotion");
+              ppmod.fire(cube,"enablepickup");
+              cubeStates[cubeIndex.tointeger()] <- false;
+            } 
+          } else {
+            print("hit world.")
+            print(traceResult.GetEntityClassname())
+            print(traceResult.GetEntity())
+            print(cube)
+          }
+      } else {
+          print("didn't hit anything.")
+      }
+      
+    })//end of cube hook function 2
+  })//end of entire script for info ping detector 2
+  } else if (GetMapName() == "mp_coop_teambts") {
+    ppmod.wait(function() {
+      scns_cpm_diskgreenonly <- function(activatora,activatorb) {
+            if (activatora.GetName() == "blue") {
+              EntFire("@dissolver","dissolve","disk")
+              ppmod.wait(function() {
+                EntFire("ptemplate_disk_spawn","forcespawn")
+                ppmod.wait(function() {
+                  ppmod.addscript("disk","OnPlayerPickup",function(activator,caller) {
+                    scns_cpm_diskgreenonly(activator,caller)
+                  },0.0,-1,true)
+                  ppmod.fire(ppmod.get("disk",ppmod.get("disk")),"color","0 255 0")
+                },1) 
+              },0.05)
+            }
+          }
+          ppmod.addscript("disk","OnPlayerPickup",function(activator,caller) {
+            scns_cpm_diskgreenonly(activator,caller)
+          },0.0,-1,true)
+          ppmod.fire("disk","color","0 255 0")
+          ppmod.addscript("AutoInstance1-$cleanser_name","OnDissolve",function(activator,caller) {
+            ppmod.wait(function() {
+              ppmod.addscript("disk","OnPlayerPickup",function(activator,caller) {
+                scns_cpm_diskgreenonly(activator,caller)
+              },0.0,-1,true)
+              ppmod.fire(ppmod.get("disk",ppmod.get("disk")),"color","0 255 0")
+            },1) 
+          },0.0,-1,true)
+    },3)
+    
+  }
 } else if (GetDeveloperLevel() == 6) {
   ppmod.interval(function() {
       ppmod.fire(red,"addoutput","movetype 4")
       ppmod.fire(blue,"addoutput","movetype 4")
   }0.5);
 } else if (GetDeveloperLevel() == 7) {
-::spc <- {};
-::con_ent <- Entities.CreateByClassname("point_clientcommand");
-::bcon_ent <- Entities.CreateByClassname("point_broadcastclientcommand");
-spc.portals <- [];
+  ppmod.wait(function() {
+    ::spc <- {};
+    ::con_ent <- Entities.CreateByClassname("point_clientcommand");
+    ::bcon_ent <- Entities.CreateByClassname("point_broadcastclientcommand");
+    spc.portals <- [];
 
-spc.resize <- function() {
-    if (spc.psize) {
-        spc.psize = 0;
-        ppmod.fire("prop_portal", "Resize", "32 55.9");
-    } else {
-        spc.psize = 1;
-        ppmod.fire("prop_portal", "Resize", "32 56");
-    }
-    ppmod.fire("prop_portal", "SetLinkageGroupID", 99);
-    ppmod.fire("prop_portal", "AddOutput", "PortalTwo 0");
-};
-
-local setupfunc = function() {
-    ppmod.fire("prop_portal", "Fizzle");
-
-    ppmod.interval(function() {
-        if (ppmod.get("weapon_portalgun", ppmod.get("weapon_portalgun")) == null) return;
-
-        ppmod.keyval("weapon_portalgun", "CanFirePortal1", true);
-        ppmod.keyval("weapon_portalgun", "CanFirePortal2", false);
-
-        // Additional setup depending on map
-        // Details omitted for brevity...
-
-        //ppmod.fire("prop_portal", "Fizzle");
+    spc.resize <- function() {
+        if (spc.psize) {
+            spc.psize = 0;
+            ppmod.fire("prop_portal", "Resize", "32 55.9");
+        } else {
+            spc.psize = 1;
+            ppmod.fire("prop_portal", "Resize", "32 56");
+        }
         ppmod.fire("prop_portal", "SetLinkageGroupID", 99);
         ppmod.fire("prop_portal", "AddOutput", "PortalTwo 0");
+    };
 
-        // Loop to find and manipulate portals
-        for (local prt = ppmod.get("prop_portal"); prt; prt = ppmod.get("prop_portal", prt)) {
-            local found = false;
-            for (local i = 0; i < spc.portals.len(); i++) {
-                if (prt == spc.portals[i]) {
-                    found = true;
-                    break;
+    local setupfunc = function() {
+        ppmod.fire("prop_portal", "Fizzle");
+
+        ppmod.interval(function() {
+            if (ppmod.get("weapon_portalgun", ppmod.get("weapon_portalgun")) == null) return;
+
+            ppmod.keyval("weapon_portalgun", "CanFirePortal1", true);
+            ppmod.keyval("weapon_portalgun", "CanFirePortal2", false);
+
+            // Additional setup depending on map
+            // Details omitted for brevity...
+
+            //ppmod.fire("prop_portal", "Fizzle");
+            ppmod.fire("prop_portal", "SetLinkageGroupID", 99);
+            ppmod.fire("prop_portal", "AddOutput", "PortalTwo 0");
+
+            // Loop to find and manipulate portals
+            for (local prt = ppmod.get("prop_portal"); prt; prt = ppmod.get("prop_portal", prt)) {
+                local found = false;
+                for (local i = 0; i < spc.portals.len(); i++) {
+                    if (prt == spc.portals[i]) {
+                        found = true;
+                        break;
+                    }
                 }
+
+                if (!found) {
+                    spc.portals.push(prt);
+                    ppmod.addoutput(prt, "OnPlacedSuccessfully", bcon_ent, "Command", "cl_cmdrate 60");
+                    ppmod.addoutput(prt, "OnPlacedSuccessfully", bcon_ent, "Command", "script spc.resize()");
+                    ppmod.addoutput(prt, "OnPlacedSuccessfully", bcon_ent, "Command", "cl_cmdrate 30", FrameTime());
+                }
+
             }
+            ppmod.fire("spc_spawnloop", "Kill");
+            ppmod.fire(con_ent, "Command", "+duck", 0, red);
 
-            if (!found) {
-                spc.portals.push(prt);
-                ppmod.addoutput(prt, "OnPlacedSuccessfully", bcon_ent, "Command", "cl_cmdrate 60");
-                ppmod.addoutput(prt, "OnPlacedSuccessfully", bcon_ent, "Command", "script spc.resize()");
-                ppmod.addoutput(prt, "OnPlacedSuccessfully", bcon_ent, "Command", "cl_cmdrate 30", FrameTime());
-            }
+            ppmod.wait(function(pos = pos, ang = ang) {
 
-        }
-        ppmod.fire("spc_spawnloop", "Kill");
-        ppmod.fire(con_ent, "Command", "+duck", 0, red);
+              local red = ppmod.get("red");
+              red.SetOrigin(pos);
+              red.SetAngles(ang.x, ang.y, ang.z);
 
-        ppmod.wait(function(pos = pos, ang = ang) {
-
-          local red = ppmod.get("red");
-          red.SetOrigin(pos);
-          red.SetAngles(ang.x, ang.y, ang.z);
-
-          ppmod.fire(bcon_ent, "Command", "fadein 0");
-          ppmod.fire(bcon_ent, "Command", "debug_fixmyposition");
-          ppmod.fire(con_ent, "Command", "-duck", 0, red);
-
-          spc.redstuck <- pos.z;
-          ppmod.interval(function(red = red) {
-
-            if (red.GetOrigin().z == spc.redstuck) {
+              ppmod.fire(bcon_ent, "Command", "fadein 0");
               ppmod.fire(bcon_ent, "Command", "debug_fixmyposition");
-            } else {
-              ppmod.get("spc_redstuck_loop").Destroy();
-            }
+              ppmod.fire(con_ent, "Command", "-duck", 0, red);
 
-          }, 0.5, "spc_redstuck_loop");
+              spc.redstuck <- pos.z;
+              ppmod.interval(function(red = red) {
 
-        }, 0.2);
+                if (red.GetOrigin().z == spc.redstuck) {
+                  ppmod.fire(bcon_ent, "Command", "debug_fixmyposition");
+                } else {
+                  ppmod.get("spc_redstuck_loop").Destroy();
+                }
 
-    }, 0, "spc_spawnloop");
+              }, 0.5, "spc_redstuck_loop");
 
-};
+            }, 0.2);
 
-setupfunc(); // Initialize the function to start the bizarre portal mechanic
+        }, 0, "spc_spawnloop");
+
+    };
+
+    setupfunc(); // Initialize the function to start the bizarre portal mechanic
+  },0.5)
+
+  // ::con_ent2 <- Entities.CreateByClassname("point_servercommmand")
+  // ::con_ent <- Entities.CreateByClassname("point_clientcommand");
+  // ::bcon_ent <- Entities.CreateByClassname("point_broadcastclientcommand");
+  // ppmod.keyval(scns_ent2,"targetname","scns_servercommand")
+  // ppmod.fire(scns_ent2,"command","connectportals")
+  ppmod.getall(["info_coop_spawn"], function (ent) {
+    local vclip = ppmod.trigger(ent.GetOrigin(), Vector(32,32,72), "trigger_multiple")
+    ppmod.addscript(vclip,"OnStartTouch",function() {
+      ::spc <- {};
+      ::con_ent <- Entities.CreateByClassname("point_clientcommand");
+      ::bcon_ent <- Entities.CreateByClassname("point_broadcastclientcommand");
+      spc.portals <- [];
+
+      spc.resize <- function() {
+          if (spc.psize) {
+              spc.psize = 0;
+              ppmod.fire("prop_portal", "Resize", "32 55.9");
+          } else {
+              spc.psize = 1;
+              ppmod.fire("prop_portal", "Resize", "32 56");
+          }
+          ppmod.fire("prop_portal", "SetLinkageGroupID", 99);
+          ppmod.fire("prop_portal", "AddOutput", "PortalTwo 0");
+      };
+
+      local setupfunc = function() {
+          ppmod.fire("prop_portal", "Fizzle");
+
+          ppmod.interval(function() {
+              if (ppmod.get("weapon_portalgun", ppmod.get("weapon_portalgun")) == null) return;
+
+              ppmod.keyval("weapon_portalgun", "CanFirePortal1", true);
+              ppmod.keyval("weapon_portalgun", "CanFirePortal2", false);
+
+              // Additional setup depending on map
+              // Details omitted for brevity...
+
+              //ppmod.fire("prop_portal", "Fizzle");
+              ppmod.fire("prop_portal", "SetLinkageGroupID", 99);
+              ppmod.fire("prop_portal", "AddOutput", "PortalTwo 0");
+
+              // Loop to find and manipulate portals
+              for (local prt = ppmod.get("prop_portal"); prt; prt = ppmod.get("prop_portal", prt)) {
+                  local found = false;
+                  for (local i = 0; i < spc.portals.len(); i++) {
+                      if (prt == spc.portals[i]) {
+                          found = true;
+                          break;
+                      }
+                  }
+
+                  if (!found) {
+                      spc.portals.push(prt);
+                      ppmod.addoutput(prt, "OnPlacedSuccessfully", bcon_ent, "Command", "cl_cmdrate 60");
+                      ppmod.addoutput(prt, "OnPlacedSuccessfully", bcon_ent, "Command", "script spc.resize()");
+                      ppmod.addoutput(prt, "OnPlacedSuccessfully", bcon_ent, "Command", "cl_cmdrate 30", FrameTime());
+                  }
+
+              }
+              ppmod.fire("spc_spawnloop", "Kill");
+              ppmod.fire(con_ent, "Command", "+duck", 0, red);
+
+              ppmod.wait(function(pos = pos, ang = ang) {
+
+                local red = ppmod.get("red");
+                red.SetOrigin(pos);
+                red.SetAngles(ang.x, ang.y, ang.z);
+
+                ppmod.fire(bcon_ent, "Command", "fadein 0");
+                ppmod.fire(bcon_ent, "Command", "debug_fixmyposition");
+                ppmod.fire(con_ent, "Command", "-duck", 0, red);
+
+                spc.redstuck <- pos.z;
+                ppmod.interval(function(red = red) {
+
+                  if (red.GetOrigin().z == spc.redstuck) {
+                    ppmod.fire(bcon_ent, "Command", "debug_fixmyposition");
+                  } else {
+                    ppmod.get("spc_redstuck_loop").Destroy();
+                  }
+
+                }, 0.5, "spc_redstuck_loop");
+
+              }, 0.2);
+
+          }, 0, "spc_spawnloop");
+
+      };
+
+      setupfunc(); // Initialize the function to start the bizarre portal mechanic
+      print("respawned")
+    })
+  })
 
 
 } else if (GetDeveloperLevel() == 8) {
@@ -1128,6 +1918,38 @@ setupfunc(); // Initialize the function to start the bizarre portal mechanic
     ppmod.fire(FindByEntIndex(3),"addoutput","teamnumber -1")
   },2)
   ppmod.fire("player","addoutput","solid 4")
+  local ent = null;     
+  while (ent = Entities.FindByClassname(ent,"prop_dynamic")) {
+    local entname = ent.GetName()
+    if (entname == "orange-station"||macros.GetPostfix(entname) == "-station") {
+      local pcapent = entLib.FromEntity(ent)
+      if (pcapent.GetSkin() == 1) {
+        local entorigin = ent.GetOrigin()
+        local entx = entorigin.x
+        local enty = entorigin.y
+        local entz = entorigin.z
+        print(entx)
+        print(enty)
+        print(entz)
+        ppmod.fire(ent,"color","0 0 0") 
+      }
+
+    }
+  }
+} else if (GetDeveloperLevel() == 16) {
+  try {
+    for (local boxdropper; boxdropper = Entities.FindByClassname(boxdropper, "prop_dynamic");) {
+      if (boxdropper.GetModelName() == "models/props_underground/underground_boxdropper.mdl") {
+        EntFireByHandle(boxdropper,"setdefaultanimaion","open_idle",3.0,null,null)
+        EntFireByHandle(boxdropper,"setanimation","open_idle",3.0,null,null)
+      }
+    }
+  } catch (exception) {
+    ppmod.interval(function() {
+      print("doesn't work!")
+    })
+  }
+  
 }
 }));
 
