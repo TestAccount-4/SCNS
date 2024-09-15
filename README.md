@@ -4,15 +4,14 @@ SCNS is a "Script Library" with a bunch of scripts for you to use.
 
 Some scripts are known to have issues, if you find out the issue and know how to fix it, please open a pull request so it can be fixed. Otherwise, please open an issue and I will try to fix it.
 
-If you need to see the documentation on scripts, then visit the documentaiton [here](ScriptDocumentation.md).
+If you need to see the documentation on scripts, then you can visit the documentation [here.](ScriptDocumentation.md)
 
 ## Notable Scripts
 
 * **[MapSpawn](mapspawn.nut)**
-* Utilizes Developer Convar to make changes
-* Ability to change the game in various ways
-* Many cool modifications like extra parts of a map and a WIP advanced version of course 01
-* Many global functions that can be used to modify the game in different ways.
+* Utilizes Developer Convar to make changes.
+* Many Interesting modifications like extra parts of a map and a WIP advanced version of course 01.
+* Various global functions that can be used to modify the game in different ways.
 
 * **[Improved Noclip Script](test01.nut)**
 * Most other noclip scripts that you find(if you can even find one break when you die or just will not work at all if you try to change your team, causing you to manually noclip every time you want to fly.
