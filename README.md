@@ -1,4 +1,5 @@
 # SCNS
+> Please note that this project is very old, I still plan on eventually making changes to this project but until then just know that in its current state this project is heavily outdated. 
 
 SCNS is a "Script Library" with a bunch of scripts for you to use.
 
