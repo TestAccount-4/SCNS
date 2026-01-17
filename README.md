@@ -1,5 +1,7 @@
 # SCNS
-> Please keep in mind that this repository has not received a major update in over a year, some things may be out of date or not work.
+> Please keep in mind that this repository has not received a major update in over a year,
+> some things may be out of date or not work.
+
 SCNS is a "Script Library" with a bunch of scripts for you to use.
 
 Some scripts are known to have issues, if you find out the issue and know how to fix it, please open a pull request so it can be fixed. Otherwise, please open an issue and I will try to fix it.
