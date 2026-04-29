@@ -5,7 +5,7 @@ SCNS is a "Script Library" with a bunch of scripts for you to use.
 
 Some scripts are known to have issues, if you find out the issue and know how to fix it, please open a pull request so it can be fixed. Otherwise, please open an issue and I will try to fix it.
 
-If you need to see the documentation on scripts, then visit the documentaiton [here](ScriptDocumentation.md).
+If you need to see the documentation on scripts, then visit the documentation [here](ScriptDocumentation.md).
 
 ## Notable Scripts
 
